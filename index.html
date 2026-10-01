@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Action.</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html, body { height: 100%; }
+  body {
+    /* 第2层：背景图片（图片2） */
+    background: url('图片2.png') no-repeat center center fixed;
+    background-size: cover;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: "Microsoft YaHei", "PingFang SC", sans-serif;
+    overflow: hidden;
+  }
+  /* 隐藏的图片1：仅用于在开发者工具中能看到它的文件结构 */
+  .hidden-img {
+    position: absolute;
+    width: 1px; height: 1px;
+    opacity: 0;
+    pointer-events: none;
+    left: -9999px;
+    top: -9999px;
+  }
+  /* 第1层：字符串（只显示字符串，点击可复制） */
+  .code {
+    font-size: 52px;
+    letter-spacing: 0.35em;
+    color: #ffffff;
+    text-shadow: 0 0 24px rgba(0, 0, 0, 0.85);
+    cursor: pointer;
+    user-select: none;
+    transition: transform 0.15s ease;
+    z-index: 10;
+  }
+  .code:active { transform: scale(0.94); }
+</style>
+</head>
+<body>
+
+  <!-- 图片1：隐藏加载，开发者工具 Network / Elements 中可见 -->
+  <img class="hidden-img" src="图片1.png" alt="图片1">
+
+  <!-- 页面上第1层显示的字符串，点击随机复制 hint -->
+  <div class="code" id="code">hyw</div>
+
+<script>
+  /*
+   * 点击 hyw 随机复制以下内容之一：
+   *   5L-      （Base64 片段提示）
+   *   -yf      （Base64 片段提示）
+   *   4？      （提示）
+   *   你准吗是备？ （真正的 2 栏栅栏密码密文，栏数 2，原文“你是准备吗？”）
+   */
+  var HINTS = [
+    '5L-',
+    '-yf',
+    '4？',
+  ];
+
+  var codeEl = document.getElementById('code');
+
+  function fallbackCopy(text) {
+    var ta = document.createElement('textarea');
+    ta.value = text;
+    ta.setAttribute('readonly', '');
+    ta.style.cssText = 'position:fixed;top:-9999px;left:-9999px;opacity:0;';
+    document.body.appendChild(ta);
+    ta.select();
+    ta.setSelectionRange(0, ta.value.length);
+    try { document.execCommand('copy'); } catch (e) {}
+    document.body.removeChild(ta);
+  }
+
+  function copyText(text) {
+    if (navigator.clipboard && window.isSecureContext) {
+      navigator.clipboard.writeText(text).catch(function () {
+        fallbackCopy(text);
+      });
+    } else {
+      fallbackCopy(text);
+    }
+  }
+
+  codeEl.addEventListener('click', function () {
+    var idx = Math.floor(Math.random() * HINTS.length);
+    copyText(HINTS[idx]);
+  });
+</script>
+
+</body>
+</html>
