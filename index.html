@@ -1,95 +1,104 @@
 <!DOCTYPE html>
-<html lang="zh-CN">
+<html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Action.</title>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>hyw</title>
 <style>
-  * { margin: 0; padding: 0; box-sizing: border-box; }
-  html, body { height: 100%; }
+  html, body {
+    height: 100%;
+    margin: 0;
+  }
   body {
-    /* 第2层：背景图片（图片2） */
-    background: url('图片2.jpg') no-repeat center center fixed;
-    background-size: cover;
     display: flex;
     align-items: center;
     justify-content: center;
-    font-family: "Microsoft YaHei", "PingFang SC", sans-serif;
-    overflow: hidden;
+    background: #0f1115;
+    color: #e9e9ec;
+    font-family: system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
   }
-  /* h：啊啊啊
-  .hidden-img {
-    position: absolute;
-    width: 1px; height: 1px;
-    opacity: 0;
-    pointer-events: none;
-    left: -9999px;
-    top: -9999px;
-  }
-  /* 第1层：字符串（只显示字符串，点击可复制） */
-  .code {
-    font-size: 52px;
-    letter-spacing: 0.35em;
-    color: #ffffff;
-    text-shadow: 0 0 24px rgba(0, 0, 0, 0.85);
+  #t {
+    font-size: 2rem;
+    letter-spacing: .08em;
+    padding: .6em 1.1em;
+    border-radius: 14px;
     cursor: pointer;
     user-select: none;
-    transition: transform 0.15s ease;
-    z-index: 10;
+    -webkit-user-select: none;
+    -webkit-tap-highlight-color: transparent;
+    transition: transform .12s ease, background .25s ease, opacity .25s ease;
   }
-  .code:active { transform: scale(0.94); }
+  #t:hover { background: rgba(255,255,255,.06); }
+  #t:active { transform: scale(.94); }
+  #t.flash { opacity: .45; }
 </style>
 </head>
 <body>
-
-  
-  <img class="hidden-img" src="图片1.jpg " alt="图片1">
-
-  
-  <div class="code" id="code">hyw</div>
-
+<div id="t">hyw</div>
 <script>
-  /*
-   * 点击 hyw 随机复制以下内容之一：
-   *   5L-      
-   *   -yf     
-   *   4？      
-   */
-  var HINTS = [
-    '5L-',
-    '-yf',
-    '4？',
+(function () {
+  var K = 0x5a;
+  var P = [
+    "207377",
+    "770f19",
+    "12030d",
+    "292a2833343d0529373d"
   ];
 
-  var codeEl = document.getElementById('code');
+  var el = document.getElementById("t");
+  var last = -1;
 
-  function fallbackCopy(text) {
-    var ta = document.createElement('textarea');
+  function unpack(hex) {
+    var out = "";
+    for (var i = 0; i < hex.length; i += 2) {
+      out += String.fromCharCode(parseInt(hex.substr(i, 2), 16) ^ K);
+    }
+    return out;
+  }
+
+  function pick() {
+    var i;
+    do {
+      i = Math.floor(Math.random() * P.length);
+    } while (P.length > 1 && i === last);
+    last = i;
+    return unpack(P[i]);
+  }
+
+  function legacyCopy(text) {
+    var ta = document.createElement("textarea");
     ta.value = text;
-    ta.setAttribute('readonly', '');
-    ta.style.cssText = 'position:fixed;top:-9999px;left:-9999px;opacity:0;';
+    ta.setAttribute("readonly", "");
+    ta.style.position = "fixed";
+    ta.style.top = "-1000px";
+    ta.style.opacity = "0";
     document.body.appendChild(ta);
     ta.select();
     ta.setSelectionRange(0, ta.value.length);
-    try { document.execCommand('copy'); } catch (e) {}
+    try { document.execCommand("copy"); } catch (e) {}
     document.body.removeChild(ta);
   }
 
-  function copyText(text) {
-    if (navigator.clipboard && window.isSecureContext) {
+  function copy(text) {
+    if (navigator.clipboard && navigator.clipboard.writeText) {
       navigator.clipboard.writeText(text).catch(function () {
-        fallbackCopy(text);
+        legacyCopy(text);
       });
     } else {
-      fallbackCopy(text);
+      legacyCopy(text);
     }
   }
 
-  codeEl.addEventListener('click', function () {
-    var idx = Math.floor(Math.random() * HINTS.length);
-    copyText(HINTS[idx]);
-  });
-</script>
+  function flash() {
+    el.classList.add("flash");
+    setTimeout(function () { el.classList.remove("flash"); }, 120);
+  }
 
+  el.addEventListener("click", function () {
+    copy(pick());
+    flash();
+  });
+})();
+</script>
 </body>
 </html>
